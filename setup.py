@@ -8,5 +8,5 @@ setup(
     description='Adds a class field to django',
     author='Mike Harris',
     url='https://github.com/mikeharris100/django-classfield',
-    py_modules=['classfield']
+    packages=['classfield']
 )
