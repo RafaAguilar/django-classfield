@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
 from django import forms
+from django.forms.models import model_to_dict
 
 
 class ClassField(models.Field):
