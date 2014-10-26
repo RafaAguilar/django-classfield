@@ -17,7 +17,10 @@ class ClassField(models.Field):
     def __init__(self, *args, **kwargs):
         if 'choices' not in kwargs:
             kwargs['editable'] = False
-
+        # BoundField will try to call the class
+        if initial in kwargs:
+            initial = kwargs['initial']
+            kwargs['initial'] = lambda: initial
         kwargs.setdefault('max_length', 255)
         super(ClassField, self).__init__(*args, **kwargs)
         # flaw in django 'self._choices = choices or []'
@@ -79,3 +82,15 @@ class ClassField(models.Field):
         if self._choices and 'choices' not in kwargs:
             kwargs['choices'] = list((self.get_prep_value(Class), label) for Class, label in self._choices)
         return super(ClassField, self).formfield(**kwargs)
+    
+    def value_from_object(self, obj):
+        # hack: django BoundField calls any initial data that it can
+        # initial data is collected in model_to_dict.
+        # give it a lambda instead of instantiating the class,
+        # otherwise, initial form value will not be correct.
+        value = super(ClassField, self).value_from_object(obj)
+        if sys._getframe(1).f_code == model_to_dict.func_code:
+            return lambda: value
+        else:
+            return value
+    
