@@ -1,9 +1,6 @@
-import sys
 from django.db import models
 from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
-from django import forms
-from django.forms.models import model_to_dict
 
 
 class ClassField(models.Field):
@@ -19,10 +16,10 @@ class ClassField(models.Field):
     def __init__(self, *args, **kwargs):
         if 'choices' not in kwargs:
             kwargs['editable'] = False
-        # BoundField will try to call the class
+        # BoundField will try to call a class
         if 'initial' in kwargs:
             initial = kwargs['initial']
-            kwargs['initial'] = lambda: initial
+            kwargs['initial'] = unicode(initial)
         kwargs.setdefault('max_length', 255)
         super(ClassField, self).__init__(*args, **kwargs)
         # flaw in django 'self._choices = choices or []'
@@ -86,13 +83,7 @@ class ClassField(models.Field):
         return super(ClassField, self).formfield(**kwargs)
     
     def value_from_object(self, obj):
-        # hack: django BoundField calls any initial data that it can
-        # initial data is collected in model_to_dict.
-        # give it a lambda instead of instantiating the class,
-        # otherwise, initial form value will not be correct.
-        value = super(ClassField, self).value_from_object(obj)
-        if sys._getframe(1).f_code == model_to_dict.func_code:
-            return lambda: value
-        else:
-            return value
-    
+        """Returns the unicode name of the class, otherwise BoundField will
+        mistake the class for a callable and try to instantiate it.
+        """
+        return unicode(super(ClassField, self).value_from_object(obj))
