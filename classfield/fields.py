@@ -20,7 +20,7 @@ class ClassField(models.Field):
         if 'choices' not in kwargs:
             kwargs['editable'] = False
         # BoundField will try to call the class
-        if initial in kwargs:
+        if 'initial' in kwargs:
             initial = kwargs['initial']
             kwargs['initial'] = lambda: initial
         kwargs.setdefault('max_length', 255)
