@@ -32,6 +32,12 @@ class ClassField(models.Field):
         return unicode(value)
 
     def get_db_prep_value(self, value, connection, prepared=False):
+        # Hack to workaround flaws in Django where django will try to be helpful
+        # and conveniently call a callable in various places.
+        # No need to do that in any situation, as the client code should
+        # explicitly call a callable itself.
+        if not isinstance(value, type):
+            value = type(value)
         return "%s.%s" % (value.__module__, value.__name__)
 
     def value_to_string(self, obj):
