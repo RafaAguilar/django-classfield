@@ -8,5 +8,9 @@ setup(
     description='Adds a class field to django',
     author='Mike Harris',
     url='https://github.com/mikeharris100/django-classfield',
+    license='MIT',
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+    ],
     packages=['classfield']
 )
