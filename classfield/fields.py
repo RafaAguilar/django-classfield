@@ -68,12 +68,12 @@ class ClassField(models.Field):
             else:
                 return value
 
-    def get_db_prep_lookup(self, lookup_type, value):
+    def get_db_prep_lookup(self, lookup_type, value, connection=None):
         # We only handle 'exact' and 'in'. All others are errors.
         if lookup_type == 'exact':
-            return [self.get_db_prep_save(value)]
+            return [self.get_db_prep_save(value, connection=connection)]
         elif lookup_type == 'in':
-            return [self.get_db_prep_save(v) for v in value]
+            return [self.get_db_prep_save(v, connection=connection) for v in value]
         else:
             raise TypeError('Lookup type %r not supported.' % lookup_type)
 
