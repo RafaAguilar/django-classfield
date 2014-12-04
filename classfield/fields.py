@@ -4,6 +4,13 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class ClassField(models.Field):
+    """A field which can store and return a class.
+
+    This is useful for improving models that have a 'type code smell'.
+    Instead of sniffing the type code, the field can provide one of several
+    instantiable classes that can have named methods.
+
+    """
     __metaclass__ = SubfieldBase
 
     description = _('Class Field')
@@ -29,15 +36,28 @@ class ClassField(models.Field):
             self._choices = kwargs['choices']
 
     def get_prep_value(self, value):
-        return unicode(value)
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        # Hack to workaround flaws in Django where django will try to be helpful
-        # and conveniently call a callable in various places.
-        # No need to do that in any situation, as the client code should
-        # explicitly call a callable itself.
+        if isinstance(value, basestring):
+            return value
         if not isinstance(value, type):
             value = type(value)
+            if self.choices:
+                choice_dict = dict(self.choices)
+                if value not in choice_dict:
+                    raise TypeError(
+                        u"%s is not a valid choice for %s. Valid choices are %s" % (
+                            value,
+                            self,
+                            choice_dict.keys()
+                        )
+                    )
+        return self.get_db_prep_value(value, connection=None)
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        """Accepts a string for convenience. String should be of the same format
+        as that of the stored class paths.
+        """
+        if isinstance(value, basestring):
+            return value
         return "%s.%s" % (value.__module__, value.__name__)
 
     def value_to_string(self, obj):
