@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='django-classfield',
@@ -12,5 +13,5 @@ setup(
     classifiers=[
         'License :: OSI Approved :: MIT License',
     ],
-    packages=['classfield']
+    packages=find_packages('.')
 )
