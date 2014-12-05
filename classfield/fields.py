@@ -3,6 +3,10 @@ from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
 
 
+def class_path(cls):
+    return cls.__module__ + '.' + cls.__name__
+
+
 class ClassField(models.Field):
     """A field which can store and return a class.
 
@@ -58,7 +62,7 @@ class ClassField(models.Field):
         """
         if isinstance(value, basestring):
             return value
-        return "%s.%s" % (value.__module__, value.__name__)
+        return class_path(value)
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
@@ -109,7 +113,7 @@ class ClassField(models.Field):
         return super(ClassField, self).formfield(**kwargs)
     
     def value_from_object(self, obj):
-        """Returns the unicode name of the class, otherwise BoundField will
+        """Returns the class path, otherwise BoundField will
         mistake the class for a callable and try to instantiate it.
         """
-        return unicode(super(ClassField, self).value_from_object(obj))
+        return class_path(super(ClassField, self).value_from_object(obj))
