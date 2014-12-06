@@ -42,6 +42,8 @@ class ClassField(models.Field):
     def get_prep_value(self, value):
         if isinstance(value, basestring):
             return value
+        if value is None and self.null == True:
+            return None
         if not isinstance(value, type):
             value = type(value)
             if self.choices:
@@ -109,7 +111,12 @@ class ClassField(models.Field):
 
     def formfield(self, **kwargs):
         if self._choices and 'choices' not in kwargs:
-            kwargs['choices'] = list((self.get_prep_value(Class), label) for Class, label in self._choices)
+            choices = list()
+            if self.null:
+                choices.append((None, '---------'))
+            for Class, label in self._choices:
+                choices.append((self.get_prep_value(Class), label))
+            kwargs['choices'] = choices
         return super(ClassField, self).formfield(**kwargs)
     
     def value_from_object(self, obj):
