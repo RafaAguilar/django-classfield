@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-classfield',
-    version='1.0.5',
+    version='1.0.6',
     description='Adds a class field to django',
     author='Mike Harris',
     url='https://github.com/mikeharris100/django-classfield',
