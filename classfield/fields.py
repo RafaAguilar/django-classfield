@@ -124,3 +124,12 @@ class ClassField(models.Field):
         mistake the class for a callable and try to instantiate it.
         """
         return class_path(super(ClassField, self).value_from_object(obj))
+
+    def get_prep_lookup(self, lookup_type, value):
+        # We only handle 'exact' and 'in'. All others are errors.
+        if lookup_type == 'exact':
+            return self.to_python(value)
+        elif lookup_type == 'in':
+            return [self.to_python(v) for v in value]
+        else:
+            raise TypeError('Lookup type %r not supported.' % lookup_type)
