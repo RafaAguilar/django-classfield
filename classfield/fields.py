@@ -111,7 +111,7 @@ class ClassField(models.Field):
             raise TypeError('Lookup type %r not supported.' % lookup_type)
 
     def formfield(self, **kwargs):
-        if DJANGO_VERSION > (1, 8):
+        if DJANGO_VERSION < (1, 9):
             if self._choices and 'choices' not in kwargs:
                 choices = list()
                 if self.null:
