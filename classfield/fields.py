@@ -1,3 +1,4 @@
+from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
@@ -110,13 +111,14 @@ class ClassField(models.Field):
             raise TypeError('Lookup type %r not supported.' % lookup_type)
 
     def formfield(self, **kwargs):
-        if self._choices and 'choices' not in kwargs:
-            choices = list()
-            if self.null:
-                choices.append((None, '---------'))
-            for Class, label in self._choices:
-                choices.append((self.get_prep_value(Class), label))
-            kwargs['choices'] = choices
+        if DJANGO_VERSION > (1, 8):
+            if self._choices and 'choices' not in kwargs:
+                choices = list()
+                if self.null:
+                    choices.append((None, '---------'))
+                for Class, label in self._choices:
+                    choices.append((self.get_prep_value(Class), label))
+                kwargs['choices'] = choices
         return super(ClassField, self).formfield(**kwargs)
     
     def value_from_object(self, obj):
