@@ -90,7 +90,13 @@ class ClassField(models.Field):
                         return choice
                 raise ValueError("%s is not one of the choices of %s" % (value, self))
             else:
-                imported = __import__(module_path, globals(), locals(), [class_name], 0)
+                imported = __import__(
+                    module_path,
+                    globals(),
+                    locals(),
+                    [str(class_name)],
+                    0
+                )
                 return getattr(imported, class_name)
         else:
             if isinstance(value, basestring):
