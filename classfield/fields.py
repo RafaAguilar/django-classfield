@@ -2,21 +2,23 @@ from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
+import six
 
 
 def class_path(cls):
     return cls.__module__ + '.' + cls.__name__
 
 
-class ClassField(models.Field):
+class ClassField(
+    models.Field if DJANGO_VERSION >= (1, 8)
+    else six.with_metaclass(SubFieldBase, models.Field)
+):
     """A field which can store and return a class.
 
     This is useful for improving models that have a 'type code smell'.
     Instead of sniffing the type code, the field can provide one of several
     instantiable classes that can have named methods.
-
     """
-    __metaclass__ = SubfieldBase
 
     description = _('Class Field')
 
