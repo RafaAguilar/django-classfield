@@ -143,3 +143,7 @@ class ClassField(
             return [self.to_python(v) for v in value]
         else:
             raise TypeError('Lookup type %r not supported.' % lookup_type)
+
+    def from_db_value(self, value, expression, connection, context):
+        return self.to_python(value)
+
