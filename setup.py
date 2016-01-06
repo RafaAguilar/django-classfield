@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-classfield',
-    version='1.1.2',
+    version='1.1.3',
     description='Adds a class field to django',
     author='Mike Harris, Mike Amy',
     author_email='michael.amy@wfp.org',

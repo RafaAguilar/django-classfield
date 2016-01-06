@@ -2,6 +2,7 @@ from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.db.models import SubfieldBase
 from django.utils.translation import ugettext_lazy as _
+from django.forms.fields import ChoiceField
 import six
 
 
@@ -119,21 +120,30 @@ class ClassField(
             raise TypeError('Lookup type %r not supported.' % lookup_type)
 
     def formfield(self, **kwargs):
-        if DJANGO_VERSION < (1, 9):
-            if self._choices and 'choices' not in kwargs:
-                choices = list()
-                if self.null:
-                    choices.append((None, '---------'))
-                for Class, label in self._choices:
-                    choices.append((self.get_prep_value(Class), label))
-                kwargs['choices'] = choices
-        return super(ClassField, self).formfield(**kwargs)
+        if self._choices and 'choices' not in kwargs:
+            choices = list()
+            if self.null:
+                choices.append((None, '---------'))
+            for Class, label in self._choices:
+                choices.append((self.get_prep_value(Class), label))
+            kwargs['choices'] = choices
+        return super(ClassField, self).formfield(
+            form_class=ChoiceField,
+            **kwargs
+        )
     
     def value_from_object(self, obj):
         """Returns the class path, otherwise BoundField will
         mistake the class for a callable and try to instantiate it.
         """
-        return class_path(super(ClassField, self).value_from_object(obj))
+        if obj is None:
+            return None
+        else:
+            super_value = super(ClassField, self).value_from_object(obj)
+            if super_value:
+                return class_path(super_value)
+            else:
+                return None
 
     def get_prep_lookup(self, lookup_type, value):
         # We only handle 'exact' and 'in'. All others are errors.
@@ -146,4 +156,3 @@ class ClassField(
 
     def from_db_value(self, value, expression, connection, context):
         return self.to_python(value)
-
