@@ -127,8 +127,12 @@ class ClassField(
             for Class, label in self._choices:
                 choices.append((self.get_prep_value(Class), label))
             kwargs['choices'] = choices
+            if DJANGO_VERSION >= (1, 9):
+                return super(ClassField, self).formfield(
+                    form_class=ChoiceField,
+                    **kwargs
+                )
         return super(ClassField, self).formfield(
-            form_class=ChoiceField,
             **kwargs
         )
     
