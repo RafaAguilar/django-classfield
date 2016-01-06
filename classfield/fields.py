@@ -10,6 +10,10 @@ def class_path(cls):
     return cls.__module__ + '.' + cls.__name__
 
 
+class ClassFieldFakeRemoteField(object):
+    model = None
+
+
 class ClassField(
     models.Field if DJANGO_VERSION >= (1, 8)
     else six.with_metaclass(SubFieldBase, models.Field)
@@ -42,6 +46,13 @@ class ClassField(
         # that is added to after the field is created.
         if 'choices' in kwargs:
             self._choices = kwargs['choices']
+        # Workaround for a bug in django 1.9
+        # in SQLUpdateCompiler.as_sql, it prohibits setting
+        # anything with a prepare_database_save() method on a
+        # field that has no remote_field.
+        # That's silly, it should let the field control this.
+        self.remote_field = ClassFieldFakeRemoteField()
+        self.db_constraint = None
 
     def get_prep_value(self, value):
         if isinstance(value, basestring):
@@ -160,3 +171,27 @@ class ClassField(
 
     def from_db_value(self, value, expression, connection, context):
         return self.to_python(value)
+
+
+class PrepareDatabaseSaveDescriptor(object):
+    """A descriptor to work around a flaw in django;
+
+    SQLUpdateCompiler.as_sql() calls model.prepare_database_save if value has
+    this method (ideally it should let the field decide).
+
+    Plus we encounter a bug in python itself;
+      (class methods names clash with instance method names)
+
+    Therefore a descriptor is appropriate, pythonic workaround, but
+    better if the django flaw is fixed.
+    """
+    def __get__(self, obj, type=None):
+        # return appropriate method based on instance or class:
+        if obj is None:
+            def class_prepare_database_save(field):
+                return field.get_prep_value(type)
+            return class_prepare_database_save
+        else:
+            def object_prepare_database_save(field):
+                return super(Token, obj).prepare_database_save(field)
+            return object_prepare_database_save
