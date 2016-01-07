@@ -10,12 +10,24 @@ def class_path(cls):
     return cls.__module__ + '.' + cls.__name__
 
 
+class FakeType(type):
+    def __nonzero__(cls):
+        return False
+
+
+class FakeModel(six.with_metaclass(FakeType, object)):
+    class _meta:
+        concrete_fields = []
+        fields = []
+
+
 class ClassFieldFakeRemoteField(object):
     """Make this look a bit like a ForeignKey (but not).
     Workaround for bug in SQLUpdateCompiler.as_sql()
     """
-    model = None
-    parent_link = None
+    model = FakeModel
+    parent_link = True
+
 
 class ClassField(
     models.Field if DJANGO_VERSION >= (1, 8)
