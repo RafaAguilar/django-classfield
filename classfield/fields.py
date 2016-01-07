@@ -11,8 +11,11 @@ def class_path(cls):
 
 
 class ClassFieldFakeRemoteField(object):
+    """Make this look a bit like a ForeignKey (but not).
+    Workaround for bug in SQLUpdateCompiler.as_sql()
+    """
     model = None
-
+    parent_link = None
 
 class ClassField(
     models.Field if DJANGO_VERSION >= (1, 8)
