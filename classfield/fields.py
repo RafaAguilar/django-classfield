@@ -41,6 +41,8 @@ class ClassField(
     """
 
     description = _('Class Field')
+    
+    rel = None
 
     _south_introspects = True
 
