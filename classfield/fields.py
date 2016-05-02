@@ -19,6 +19,8 @@ class FakeModel(six.with_metaclass(FakeType, object)):
     class _meta:
         concrete_fields = []
         fields = []
+        app_label = 'ClassField'
+        model_name = 'ClassFields FakeModel'
 
 
 class ClassFieldFakeRemoteField(object):
