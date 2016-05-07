@@ -74,7 +74,7 @@ class ClassField(
         self.db_constraint = None
 
     def get_prep_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         if value is None and self.null == True:
             return None
@@ -96,7 +96,7 @@ class ClassField(
         """Accepts a string for convenience. String should be of the same format
         as that of the stored class paths.
         """
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         return class_path(value)
 
@@ -109,7 +109,7 @@ class ClassField(
         """
         if value is None or value == '':
             return None
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             if value.startswith("<class '"):
                 value = value[len("<class '"):-len("'>")]
             try:
@@ -132,7 +132,7 @@ class ClassField(
                 )
                 return getattr(imported, class_name)
         else:
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 for (choice, description) in self.choices:
                     if value == choice:
                         return choice
